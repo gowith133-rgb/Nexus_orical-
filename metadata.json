@@ -1,0 +1,6 @@
+{
+  "name": "Nexus Oracle",
+  "description": "High-frequency multi-agent trading node powered by Metamatrix technology.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
