@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-10-03T12:49:00Z",
+  "head_hash": "cb71d5c7ede6c5e2a736af52da4ef6aa9679b10051a7bd56ddec5f5130f61e9d",
+  "trades": 70,
+  "wins": 24,
+  "losses": 46,
+  "win_rate": 0.3429,
+  "gross_pnl_usd": -24.59,
+  "total_fees_usd": 175.0,
+  "net_pnl_usd": -199.59,
+  "median_trade_pnl_usd": -5.51,
+  "best_trade_usd": 67.53,
+  "worst_trade_usd": -26.1,
+  "modes": [
+    "paper"
+  ],
+  "strategies": [
+    "ma-crossover-v1"
+  ],
+  "daily": [
+    {
+      "day": "2026-09-01",
+      "trades": 13,
+      "pnl_usd": -13.74
+    },
+    {
+      "day": "2026-09-02",
+      "trades": 15,
+      "pnl_usd": -72.38
+    },
+    {
+      "day": "2026-09-03",
+      "trades": 12,
+      "pnl_usd": 101.63
+    },
+    {
+      "day": "2026-09-04",
+      "trades": 13,
+      "pnl_usd": -51.64
+    },
+    {
+      "day": "2026-09-05",
+      "trades": 12,
+      "pnl_usd": -17.36
+    },
+    {
+      "day": "2026-09-06",
+      "trades": 5,
+      "pnl_usd": 28.9
+    }
+  ]
+}
