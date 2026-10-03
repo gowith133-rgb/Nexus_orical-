@@ -18,7 +18,7 @@
 
 import { createHash } from "node:crypto";
 import { appendFileSync, writeFileSync } from "node:fs";
-import type { Fill } from "./portfolio.js";
+import type { Fill } from "./portfolio.ts";
 
 export const GENESIS = "GENESIS";
 

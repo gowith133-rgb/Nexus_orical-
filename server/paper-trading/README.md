@@ -16,13 +16,13 @@ offers is time back and a public record you can verify yourself.
 ## The loop
 
 ```
-SimulatedFeed  →  MovingAverageCrossover  →  PaperPortfolio  →  HashChainedLedger
- (fake prices)     (simple trend rule)        (paper cash)       (trades.jsonl)
-                                                                      │
-                                                                      ▼
-                                                         publish_ticker.py verifies
-                                                         the chain and publishes
-                                                         ticker.json + TICKER.md
+SimulatedFeed  →  MovingAverageCrossover  →  OracleGate  →  PaperPortfolio  →  HashChainedLedger
+ (fake prices)     (simple trend rule)       (decay veto)     (paper cash)       (trades.jsonl)
+                                                                                      │
+                                                                                      ▼
+                                                                         publish_ticker.py verifies
+                                                                         the chain and publishes
+                                                                         ticker.json + TICKER.md
 ```
 
 1. **Feed** (`feed.ts`) — geometric random walk, seeded PRNG. Same seed,
@@ -38,6 +38,34 @@ SimulatedFeed  →  MovingAverageCrossover  →  PaperPortfolio  →  HashChaine
    format contract is defined by `ticker/publish_ticker.py`; the ledger
    self-checks every record the same way the publisher will, so a bug
    here fails fast instead of producing an unpublishable log.
+
+## Oracle Protection (the decay gate)
+
+Between the strategy and the portfolio sits the **Oracle gate**
+(`oracle.ts`) — the part of Nexus that says "not on stale news."
+
+Every signal is timestamped when it is emitted. Before it can execute,
+the gate decays its confidence toward a neutral **0.500** baseline with
+a **15-minute half-life**:
+
+```
+score(t) = 0.500 + (initial − 0.500) × 2^(−t/900)
+```
+
+A veto fires when the decayed score drops below **0.500**, or when the
+signal is older than **1 hour** — whichever comes first. Malformed
+signals (missing fields, impossible timestamps, nonsense confidence)
+are vetoed too: the gate **fails closed**. Vetoed signals never reach
+the portfolio, so they never become trades; the engine counts them and
+reports the tally in its summary banner.
+
+In this engine signals execute on the bar they are emitted on, so every
+well-formed signal is fresh and the veto count is normally zero. The
+gate becomes load-bearing in a live deployment, where minutes pass
+between a signal and its execution: then a signal born confident at
+0.900 reads 0.700 after fifteen minutes, and anything older than an
+hour is dead on arrival — no trading on yesterday's intelligence,
+ever.
 
 ## Run it
 
@@ -68,6 +96,7 @@ The publisher refuses tampered logs (exit 3) and names the broken line.
 |---|---|
 | `feed.ts` | Seeded simulated price feed (geometric random walk) |
 | `strategy.ts` | Moving-average crossover signal |
+| `oracle.ts` | Orical signal-decay gate ("Oracle Protection") — vetoes stale signals |
 | `portfolio.ts` | Paper cash + positions, fill accounting |
 | `ledger.ts` | Hash-chained JSONL writer (matches `publish_ticker.py`) |
 | `engine.ts` | CLI runner wiring it all together |
