@@ -67,6 +67,31 @@ between a signal and its execution: then a signal born confident at
 hour is dead on arrival — no trading on yesterday's intelligence,
 ever.
 
+## Risk rails (the circuit breakers)
+
+Paper money or not, an engine that can't stop itself is a liability.
+Four rails, all hardcoded in `risk.ts` — not config, not flags, so
+loosening one means editing the source:
+
+1. **Drawdown circuit breaker** — if total equity (cash + open-position
+   value) falls more than **8%** below its running peak, trading halts.
+2. **Daily loss kill-switch** — if one UTC day's net (realized P&L minus
+   fees) drops past **−$300**, trading halts for the day.
+3. **Hardcoded limits** — the numbers above plus the $1,000 per-trade
+   notional ceiling live as frozen constants in code. The portfolio
+   refuses to construct above the ceiling.
+4. **Halt, don't repair** — a breached rail latches. The engine flattens
+   any open position, stops, and exits. It never clears the breach and
+   resumes on its own; a human restarts it. A corrupted trade log halts
+   the same way: the log is left untouched, never "repaired."
+
+The governor watches every bar on mark-to-market equity, so the
+drawdown breaker sees open-position losses too — not just closed
+trades. The engine also re-verifies the full hash chain on disk at the
+end of every run before reporting.
+
+Exit codes: `0` clean · `4` risk halt · `5` ledger failure.
+
 ## Run it
 
 ```bash
@@ -75,6 +100,9 @@ node server/paper-trading/engine.ts --bars 4000 --out trades.jsonl --seed 42
 
 # verify + publish the proof ticker
 python3 ticker/publish_ticker.py trades.jsonl --out ticker/public
+
+# run the risk-rail breach tests (9 checks, stdlib only)
+node server/paper-trading/risk.test.ts
 ```
 
 The publisher refuses tampered logs (exit 3) and names the broken line.
@@ -99,4 +127,6 @@ The publisher refuses tampered logs (exit 3) and names the broken line.
 | `oracle.ts` | Orical signal-decay gate ("Oracle Protection") — vetoes stale signals |
 | `portfolio.ts` | Paper cash + positions, fill accounting |
 | `ledger.ts` | Hash-chained JSONL writer (matches `publish_ticker.py`) |
+| `risk.ts` | The four safety rails: drawdown breaker, daily kill-switch, hardcoded limits, halt latch |
+| `risk.test.ts` | Deliberate breach tests for the rails (run with `node`) |
 | `engine.ts` | CLI runner wiring it all together |

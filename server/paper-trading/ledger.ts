@@ -17,7 +17,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { appendFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import type { Fill } from "./portfolio.ts";
 
 export const GENESIS = "GENESIS";
@@ -114,5 +114,40 @@ export class HashChainedLedger {
 
   get headHash(): string {
     return this.prevHash;
+  }
+
+  /**
+   * Reconciliation: re-read the whole file and re-verify every link —
+   * sequence numbers, prev_hash linkage, and each record's hash — exactly
+   * the way publish_ticker.py will. Returns true only when the file on
+   * disk matches what was appended. On false the engine halts; it never
+   * attempts to repair the log.
+   */
+  verifyChain(): boolean {
+    let raw: string;
+    try {
+      raw = readFileSync(this.path, "utf8");
+    } catch {
+      return false;
+    }
+    const lines = raw.split("\n").filter((l) => l.trim().length > 0);
+    let prev = GENESIS;
+    let seq = 0;
+    for (const line of lines) {
+      let rec: Record<string, unknown>;
+      try {
+        rec = JSON.parse(line) as Record<string, unknown>;
+      } catch {
+        return false;
+      }
+      seq += 1;
+      if (rec["seq"] !== seq) return false;
+      if (rec["prev_hash"] !== prev) return false;
+      const { hash, ...body } = rec;
+      if (typeof hash !== "string") return false;
+      if (recordHash(body as Omit<TradeRecord, "hash">) !== hash) return false;
+      prev = hash;
+    }
+    return seq === this.seq;
   }
 }

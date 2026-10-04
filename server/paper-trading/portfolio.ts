@@ -8,6 +8,8 @@
  * completed round-trip record the hash-chained ledger expects.
  */
 
+import { RISK_LIMITS } from "./risk.ts";
+
 export type Side = "long" | "short";
 
 export interface Fill {
@@ -52,6 +54,13 @@ export class PaperPortfolio {
   private fills: Fill[] = [];
 
   constructor(opts: PortfolioOptions) {
+    // Rail 3 (hardcoded limits): the notional ceiling lives in risk.ts and
+    // cannot be raised from config — constructing over the ceiling refuses.
+    if (opts.notionalUsd > RISK_LIMITS.MAX_NOTIONAL_USD) {
+      throw new Error(
+        `notional $${opts.notionalUsd} exceeds the hardcoded ceiling $${RISK_LIMITS.MAX_NOTIONAL_USD} (risk.ts)`
+      );
+    }
     this.cash = opts.startingCashUsd;
     this.notionalUsd = opts.notionalUsd;
     this.feePerTradeUsd = opts.feePerTradeUsd;
@@ -76,6 +85,21 @@ export class PaperPortfolio {
   /** Flatten at the given price/ts (end of run). Returns the fill or null. */
   flatten(price: number, ts: string): Fill | null {
     return this.position ? this.close(price, ts) : null;
+  }
+
+  /**
+   * Unrealized P&L of the open position at the given price (0 when flat).
+   * The risk governor uses this every bar so the drawdown breaker sees
+   * open-position losses, not just closed ones.
+   */
+  unrealizedPnl(price: number): number {
+    const pos = this.position;
+    if (!pos) return 0;
+    const gross =
+      pos.side === "long"
+        ? ((price - pos.entryPrice) / pos.entryPrice) * pos.sizeUsd
+        : ((pos.entryPrice - price) / pos.entryPrice) * pos.sizeUsd;
+    return round2(gross);
   }
 
   private close(exitPrice: number, exitTs: string): Fill {
