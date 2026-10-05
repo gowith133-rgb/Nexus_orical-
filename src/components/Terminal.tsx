@@ -4,7 +4,7 @@ import { formatCurrency, cn } from "../lib/utils";
 
 interface TerminalProps {
   currentPrice: number;
-  mode: 'PAPER' | 'REAL';
+  mode: 'PAPER';
   activeAgentName: string;
   onOrder: (side: 'BUY' | 'SELL', stopPrice: number, size: string) => void;
 }
