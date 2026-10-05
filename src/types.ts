@@ -4,7 +4,7 @@ export type AdenosineLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 export type GlymphaticIndex = 'BETA-AMYLOID_PURGED' | 'TAU_DETECTED';
 export type NorepinephrineMetric = 'STABLE' | 'VOLATILE';
 export type SigstoreAuth = 'VERIFIED' | 'REKOR_PROOFS_VALID' | 'FAILED';
-export type TradingMode = 'PAPER' | 'REAL';
+export type TradingMode = 'PAPER';
 
 export interface Agent {
   id: string;
