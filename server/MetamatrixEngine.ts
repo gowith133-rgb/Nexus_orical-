@@ -1369,11 +1369,6 @@ export class MetamatrixEngine {
   }
 
   // --- External Actions ---
-  public setTradingMode(mode: TradingMode) {
-    this.tradingMode = mode;
-    this.log('STATUS', `System transitioned to ${mode} mode.`);
-  }
-
   public spawnAgent(name: string, type: Agent['type']) {
     const newAgent: Agent = {
       id: `agent_${Math.random().toString(36).substr(2, 9)}`,
