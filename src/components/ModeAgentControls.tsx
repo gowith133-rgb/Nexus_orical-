@@ -33,29 +33,18 @@ export function ModeAgentControls({
 
   return (
     <div className="space-y-6">
-      {/* Mode Selector */}
+      {/* Mode Indicator — paper only. There is no real-money mode. */}
       <div className="glass-panel p-1 rounded-2xl border border-white/5 flex gap-1 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-nexus-emerald/5 to-nexus-cyan/5 pointer-events-none" />
-        <button
-          onClick={() => onModeChange('PAPER')}
+        <div
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 relative z-10",
-            mode === 'PAPER' ? "bg-nexus-cyan text-nexus-bg shadow-lg" : "text-white/40 hover:text-white/60"
+            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest relative z-10",
+            "bg-nexus-cyan text-nexus-bg shadow-lg"
           )}
         >
           <Zap className="w-3.5 h-3.5" />
           Paper Trading
-        </button>
-        <button
-          onClick={() => onModeChange('REAL')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 relative z-10",
-            mode === 'REAL' ? "bg-nexus-emerald text-nexus-bg shadow-lg" : "text-white/40 hover:text-white/60"
-          )}
-        >
-          <Shield className="w-3.5 h-3.5" />
-          Real Trading
-        </button>
+        </div>
       </div>
 
       {/* Agent Quick Switcher */}
