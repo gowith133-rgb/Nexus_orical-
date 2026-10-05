@@ -93,12 +93,7 @@ async function startServer() {
     }
   });
 
-  // Mode and Agents
-  app.post("/api/mode", (req, res) => {
-    engine.setTradingMode(req.body.mode);
-    res.json({ mode: req.body.mode });
-  });
-
+  // Agents
   app.post("/api/agents/spawn", (req, res) => {
     const agent = engine.spawnAgent(req.body.name, req.body.type);
     res.json(agent);
