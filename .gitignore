@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local ledger databases (runtime state, never source)
+*.db
+*.db-shm
+*.db-wal
